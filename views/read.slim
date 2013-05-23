@@ -1,0 +1,17 @@
+- unless resource.complete?
+  == slim :form
+== slim :delete
+
+a href=url(resource.id.to_s + '/media') download
+
+dd
+  dt id
+  dd = resource.id
+  dt name
+  dd = resource.name
+  dt types
+  dd = resource.types
+  dt size
+  dd = resource.size
+  dt complete?
+  dd = resource.complete?

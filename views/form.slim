@@ -1,0 +1,13 @@
+form#upload.upload action=url(resource.id) enctype='multipart/form-data' method='post'
+  fieldset
+    legend = resource.new? ? 'create' : 'patch'
+  
+    - unless resource.new?
+      input name='_method' type='hidden' value='PATCH'
+      
+    input name='complete' type='hidden' value='true' required=true
+    input name='offset' type='hidden' value=resource.size required=true
+  
+    input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' accept=(resource.new? ? '*/*' : resource.types.first) required=true
+  
+    button submit

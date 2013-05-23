@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+gem 'coffee-script'
+gem 'mime-types'
+gem 'mustermann'
+gem 'rack-cors'
+gem 'sequel'
+gem 'sinatra'
+gem 'slim'
+gem 'sqlite3'
