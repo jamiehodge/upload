@@ -3,29 +3,43 @@ window.addEventListener 'DOMContentLoaded', ->
   class Upload
   
     constructor: (@form) ->
-      
-      @progress = document.createElement('progress')
-      @progress.value = 0
-      
-      @form.appendChild(@progress)
     
       @form.addEventListener 'submit', (e) =>
       
         e.preventDefault()
       
         @input = @form.querySelector('input[type=file]')
-        @file  = @input.files[0]
+        @files  = @input.files
         
-        @submit(@form)
+        @queue = new Array
         
-    submit: (form) ->
+        for file in @files
+          
+          @queue.push file
+          
+          figure = document.createElement('figure')
+          caption = document.createElement('figcaption')
+          caption.innerHTML = file.name
+          progress = document.createElement('progress')
+          progress.value = 0
       
-      new Chunk(form, @file, @progress).submit (e) =>
+          figure.appendChild(progress)
+          figure.appendChild(caption)
+          @form.appendChild(figure)
+          
+          @submit(@form, file, progress)
+        
+    submit: (form, file, progress) ->
+      
+      new Chunk(form, file, progress).submit (e) =>
         newForm = e.target.responseXML.querySelector('form.upload')
         if newForm
-          @submit(newForm)
+          @submit(newForm, file, progress)
         else
-          window.location.reload(true)
+          index = @queue.indexOf(file)
+          @queue.splice(index, 1)
+          
+          window.location.reload(true) unless @queue.length
         
   class Chunk
     

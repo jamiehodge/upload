@@ -8,6 +8,6 @@ form#upload.upload action=url(resource.id) enctype='multipart/form-data' method=
     input name='complete' type='hidden' value='true' required=true
     input name='offset' type='hidden' value=resource.size required=true
   
-    input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' accept=(resource.new? ? '*/*' : resource.types.first) required=true
+    input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' accept=(resource.new? ? '*/*' : resource.types.first) required=true multiple=true
   
     button submit
