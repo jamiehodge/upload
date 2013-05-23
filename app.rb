@@ -10,7 +10,7 @@ class App < Sinatra::Base
 
   enable :method_override
   
-  ID = %r{(?<id>\d+)}
+  ID = %r{(?<id>\d+)$}
   
   get '/' do
     slim :list
@@ -32,7 +32,7 @@ class App < Sinatra::Base
     slim :read
   end
   
-  get ID do
+  get %r{(?<id>\d+)/media$} do
     send_file resource.path
   end
   
