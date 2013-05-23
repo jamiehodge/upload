@@ -1,5 +1,4 @@
 require 'coffee-script'
-require 'mustermann'
 require 'sinatra/base'
 require 'slim'
 
@@ -8,12 +7,10 @@ require_relative 'resource'
 class App < Sinatra::Base
   
   set(:model) { Resource }
-  
-  set :pattern, capture: { id: :digit }
-  
+
   enable :method_override
   
-  register Mustermann
+  ID = %r{(?<id>\d+)}
   
   get '/' do
     slim :list
@@ -27,19 +24,19 @@ class App < Sinatra::Base
     end
   end
   
-  before '/:id' do
+  before ID do
     not_found unless resource
   end
   
-  get '/:id' do
+  get ID do
     slim :read
   end
   
-  get '/:id/media' do
+  get ID do
     send_file resource.path
   end
   
-  patch '/:id' do
+  patch ID do
     resource.set params
     
     if resource.valid? and resource.save
@@ -49,7 +46,7 @@ class App < Sinatra::Base
     end
   end
   
-  delete '/:id' do
+  delete ID do
     resource.destroy
     
     redirect to '/'

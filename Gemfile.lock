@@ -9,7 +9,6 @@ GEM
       multi_json (~> 1.0)
     mime-types (1.23)
     multi_json (1.7.3)
-    mustermann (0.1.0)
     rack (1.5.2)
     rack-cors (0.2.7)
       rack
@@ -33,7 +32,6 @@ PLATFORMS
 DEPENDENCIES
   coffee-script
   mime-types
-  mustermann
   rack-cors
   sequel
   sinatra
