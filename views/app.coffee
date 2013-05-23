@@ -56,7 +56,10 @@ window.addEventListener 'DOMContentLoaded', ->
       @form.querySelector('[name=complete]').value = complete
       
       @data = new FormData
-      @data.append 'file', @file.slice(@offset, @offset + @buffer), @file.name
+      
+      slice = @file.webkitSlice || @file.mozSlice || @file.slice
+      
+      @data.append 'file', slice.call(@file, @offset, @offset + @buffer), @file.name
       
       for input in @form.querySelectorAll('input:not([type=file])')
         @data.append input.name, input.value
