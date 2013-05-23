@@ -33,11 +33,14 @@ class App < Sinatra::Base
   end
   
   get %r{(?<id>\d+)/media$} do
-    send_file resource.path
+    send_file resource.path, 
+      filename: resource.name, type: resource.type, disposition: 'inline'
   end
   
   patch ID do
-    resource.set params
+    halt 409 if resource.complete?
+    
+    resource.set tempfile: file_params['tempfile']
     
     if resource.valid? and resource.save
       slim :read
@@ -61,6 +64,21 @@ class App < Sinatra::Base
   end
   
   def resource
-    @resource ||= params[:id] ? settings.model[params[:id]] : settings.model.new(params)
+    @resource ||= params[:id] ? settings.model[params[:id]] : settings.model.new(resource_params)
+  end
+  
+  def resource_params    
+    params.merge file_params
+  end
+  
+  def file_params
+    return {} unless file = params['file']
+    
+    {
+      'tempfile' => file[:tempfile],
+      'name' => file[:name],
+      'type' => (file[:type] || 'application/octet-stream'),
+      'size' => file[:size] || file[:tempfile].size
+    }
   end
 end

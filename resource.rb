@@ -1,13 +1,14 @@
 require 'sequel'
 require 'sqlite3'
-require 'mime-types'
 
 DB = Sequel.sqlite
 
 DB.create_table :resources do
   primary_key :id
+  foreign_key :parent_id
   String      :name
-  Boolean     :complete, default: false
+  String      :type
+  Integer      :size
 end
 
 class Resource < Sequel::Model
@@ -17,41 +18,37 @@ class Resource < Sequel::Model
   
   self.strict_param_setting = false
   
-  attr_reader :tempfile, :offset
+  attr_reader :tempfile
   
-  def file=(value)
-    self.name = value[:filename]
-    @tempfile = value[:tempfile]
+  def tempfile=(value)
+    @tempfile = value
     modified!
   end
   
-  def offset=(value)
-    @offset = value.to_i
-    modified!
+  def offset
+    new? ? 0 : path.size
   end
   
-  def types
-    return [] if new?
-    MIME::Types.type_for(path.to_s).map(&:simplified)
-  end
-  
-  def size
-    return 0 if new?
-    path.size
+  def complete?
+    offset == size
   end
   
   def validate
     super
-    validates_presence [:name, :tempfile, :offset]
+    validates_presence [:parent_id, :name, :size, :type]
   end
   
   def after_create
     super
     FileUtils.mkpath dir unless dir.exist?
+    FileUtils.touch path
   end
   
   def after_save
     super
+    
+    return unless tempfile
+
     path.open(File::CREAT|File::WRONLY) do |file|
       begin
         file.flock File::LOCK_EX
@@ -64,8 +61,12 @@ class Resource < Sequel::Model
   end
   
   def before_destroy
-    FileUtils.rm_rf path
+    delete_path
     super
+  end
+  
+  def delete_path
+    FileUtils.rm_rf path
   end
   
   def path

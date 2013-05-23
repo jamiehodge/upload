@@ -1,5 +1,5 @@
 - unless resource.complete?
-  == slim :form
+  == slim :patch
 == slim :delete
 
 a href=url(resource.id.to_s + '/media') download
@@ -10,7 +10,7 @@ dd
   dt name
   dd = resource.name
   dt types
-  dd = resource.types
+  dd = resource.type
   dt size
   dd = resource.size
   dt complete?

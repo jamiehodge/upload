@@ -1,0 +1,10 @@
+form.upload.create action=url('/') enctype='multipart/form-data' method='post'
+  fieldset
+    legend create
+    p
+      label for='parent_id' Parent ID
+      input name='parent_id' type='text' required=true value=resource.parent_id
+    p
+      input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' required=true multiple=true
+  
+    button submit
