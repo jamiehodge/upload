@@ -53,7 +53,6 @@ class App < Sinatra::Base
   end
   
   get '/app.js' do
-    content_type :js
     coffee :app
   end
   
