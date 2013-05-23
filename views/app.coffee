@@ -30,7 +30,7 @@ class Queue
     
   push: (obj) ->
     
-    @queue.push
+    @queue.push obj
     
   delete: (obj) ->
     
@@ -99,7 +99,7 @@ class Upload
         @submit(new Form(form), file, progress)
       else
         @queue.delete file
-        @done() if @queue.isEmpty
+        @done() if @queue.isEmpty()
 
   done: ->
     
