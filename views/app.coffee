@@ -16,8 +16,6 @@ class Progress
   
   update: (progress) ->
     
-    console.log progress
-    
     @progress.value = progress
       
   appendTo: (element) ->
