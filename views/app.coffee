@@ -6,40 +6,24 @@ class Progress
     @figure.classList.add @class
       
     @progress = document.createElement 'progress'
-    @progress.value = 0  
+    @progress.value = 0
+    
+    @button = document.createElement 'button'
+    @button.innerHTML = 'pause'
       
     @caption = document.createElement 'figcaption'
     @caption.innerHTML = @name
     
     @figure.appendChild @progress
+    @figure.appendChild @button
     @figure.appendChild @caption
   
   update: (progress) ->
     
     @progress.value = progress
       
-  appendTo: (element) ->
-    
-    element.appendChild @figure
-    
-class Queue
-  
-  constructor: ->
-    
-    @queue = []
-    
-  push: (obj) ->
-    
-    @queue.push obj
-    
-  delete: (obj) ->
-    
-    index = @queue.indexOf(obj)
-    @queue.splice(index, 1)
-        
-  isEmpty: ->
-    
-    not @queue.length
+  appendAfter: (element) ->    
+    element.parentNode.appendChild @figure
     
 class Form
   
@@ -55,21 +39,67 @@ class Form
     
     @metadata = @element.querySelectorAll 'input:not([type=file]):not([name=complete])'
     
+    @parentNode = @element.parentNode
+    
   files: ->
     @file_input.files
     
   addEventListener: (type, listener, useCapture = true) ->
     @element.addEventListener type, listener, useCapture
     
-  appendChild: (obj) ->
-    @element.appendChild obj
-
 class Upload
+  
+  constructor: (@form, @file, @progress, @callback) ->
+    
+    @isPaused = false
+    
+    @progress.button.addEventListener 'click', @onPauseToggle
+    
+    if 'onLine' in navigator
+      window.addEventListener 'online',  @onConnectionFound
+      window.addEventListener 'offline', @onConnectionLost
+        
+      false
+    
+  start: ->
+    factory = new ChunkFactory
+    chunk = factory.create(@form, @file, @progress)
+    
+    chunk.submit @onSuccess
+    
+  onSuccess: (e) =>    
+    if form = e.target.responseXML?.querySelector 'form.upload.patch'
+      @form = new Form(form)
+      @start() unless @isPaused
+    else
+      console.log @callback
+      @callback @
+    
+  onConnectionFound: =>
+    @resume()
+    
+  onConnectionLost: =>
+    @pause()
+    
+  onPauseToggle: =>
+    if @isPaused
+      @resume()
+    else
+      @pause()
+    
+  pause: ->
+    @isPaused = true
+    
+  resume: ->
+    @isPaused = false
+    @start()
+
+class Uploader
   
   constructor: (form) ->
     
+    @queue = []
     @form  = new Form form
-    @queue = new Queue
     
     @form.addEventListener 'submit', (e) =>
       
@@ -77,34 +107,22 @@ class Upload
       
       for file in @form.files()
         
-        @queue.push file
-        
         progress = new Progress file.name
-        progress.appendTo @form
+        progress.appendAfter @form
         
-        @submit @form, file, progress
+        upload = new Upload @form, file, progress, @onSuccess
         
-      false
-    
-  submit: (form, file, progress) ->
-    
-    factory = new ChunkFactory
-    chunk = factory.create(form, file, progress)
-    
-    chunk.submit (e) =>
+        @queue.push upload
+        
+        upload.start()
       
-      form = e.target.responseXML?.querySelector 'form.upload.patch'
-      
-      if form
-        @submit(new Form(form), file, progress)
-      else
-        @queue.delete file
-        @done() if @queue.isEmpty()
+  onSuccess: (upload) =>
+    
+    index = @queue.indexOf(upload)
+    @queue.splice(index, 1)
 
-  done: ->
-    
-    window.location.reload(true)
-      
+    window.location.reload(true) unless @queue.length
+        
 class Chunk
   
   constructor: (@form, @file, @progress) ->
@@ -167,4 +185,4 @@ class ChunkFactory
 window.addEventListener 'DOMContentLoaded', ->
   
   for form in document.querySelectorAll('form.upload')
-    new Upload form
+    new Uploader form

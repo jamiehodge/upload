@@ -1,6 +1,7 @@
-- unless resource.complete?
-  == slim :patch
-== slim :delete
+.forms
+  - unless resource.complete?
+    == slim :patch
+  == slim :delete
 
 a href=url(resource.id.to_s + '/media') download
 
