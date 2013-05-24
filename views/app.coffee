@@ -53,7 +53,7 @@ class Form
     @offset = parseInt @file_input.getAttribute('data-offset') or 0, 10
     @length = parseInt @file_input?.maxLength, 10
     
-    @metadata = @element.querySelectorAll 'input:not([type=file])'
+    @metadata = @element.querySelectorAll 'input:not([type=file]):not([name=complete])'
     
   files: ->
     @file_input.files
@@ -136,31 +136,22 @@ class Chunk
   
   data: ->
     result = new FormData
+    result.append 'complete', @isComplete
+    result.append 'file', @slice.call(@file, @startByte, @endByte), @file.name
+    result
     
   onError: ->
-    console.log 'upload error'
+    console.log "upload error: #{@file.name}"
     
   onTimeout: ->
-    console.log 'upload timeout'
+    console.log "upload timeout: #{@file.name}"
     
 class Create extends Chunk
   
   data: ->
     result = super
-    
     for input in @form.metadata
       result.append input.name, input.value
-      
-    result.append 'file[name]', @file.name
-    result.append 'file[type]', @file.type
-    result.append 'file[size]', @file.size
-    result
-      
-class Patch extends Chunk
-  
-  data: ->
-    result = super
-    result.append 'file', @slice.call @file, @startByte, @endByte, @file.name
     result
     
 class ChunkFactory
@@ -170,8 +161,8 @@ class ChunkFactory
     type = matches[1].toLowerCase()
     switch type
       when 'post' then new Create(form, file, progress)
-      when 'patch' then new Patch(form, file, progress)
-      else console.log 'upload failed'
+      when 'patch' then new Chunk(form, file, progress)
+      else console.log "upload failed: #{file.name}"
       
 window.addEventListener 'DOMContentLoaded', ->
   

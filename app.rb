@@ -40,7 +40,7 @@ class App < Sinatra::Base
   patch ID do
     halt 409 if resource.complete?
     
-    resource.set tempfile: file_params['tempfile']
+    resource.set resource_params
     
     if resource.valid? and resource.save
       slim :read
@@ -72,13 +72,7 @@ class App < Sinatra::Base
   end
   
   def file_params
-    return {} unless file = params['file']
-    
-    {
-      'tempfile' => file[:tempfile],
-      'name' => file[:name],
-      'type' => (file[:type] || 'application/octet-stream'),
-      'size' => file[:size] || file[:tempfile].size
-    }
+    return {} unless params['file']
+    { 'tempfile' => params['file'][:tempfile], 'name' => params['file'][:filename] }
   end
 end

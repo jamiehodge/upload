@@ -1,3 +1,4 @@
+require 'mime-types'
 require 'sequel'
 require 'sqlite3'
 
@@ -7,8 +8,7 @@ DB.create_table :resources do
   primary_key :id
   foreign_key :parent_id
   String      :name
-  String      :type
-  Integer      :size
+  Boolean     :complete, default: true
 end
 
 class Resource < Sequel::Model
@@ -29,13 +29,13 @@ class Resource < Sequel::Model
     new? ? 0 : path.size
   end
   
-  def complete?
-    offset == size
+  def type
+    new? ? 'application/octet-stream' : MIME::Types.type_for(path.to_s).first.simplified
   end
   
   def validate
     super
-    validates_presence [:parent_id, :name, :size, :type]
+    validates_presence [:complete, :parent_id, :name, :tempfile]
   end
   
   def after_create
@@ -69,8 +69,12 @@ class Resource < Sequel::Model
     FileUtils.rm_rf path
   end
   
+  def extension
+    File.extname(name)
+  end
+  
   def path
-    dir + [id.to_s, File.extname(name)].join
+    dir + [id.to_s, extension].join
   end
   
   def dir

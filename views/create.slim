@@ -5,6 +5,7 @@ form.upload.create action=url('/') enctype='multipart/form-data' method='post'
       label for='parent_id' Parent ID
       input name='parent_id' type='text' required=true value=resource.parent_id
     p
+      input name='complete' type='hidden' value=resource.complete?.to_s
       input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' required=true multiple=true
   
     button submit
