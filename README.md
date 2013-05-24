@@ -23,7 +23,7 @@ A simple chunked upload protocol for single or multiple files.
     <form action="http://tus.example.org/" enctype="multipart/form-data" method="post">
       <input name="parent_id" type="text" />
       <input name="complete" type="hidden" value="true" />
-      <input data-offset="0" maxLength="1024" name="file" type="file" />
+      <input maxLength="1024" name="file" type="file" />
       <button>Submit</button>
     </form>
     
@@ -66,11 +66,11 @@ A simple chunked upload protocol for single or multiple files.
     HTTP/1.1 200 OK
     ...
     
-    <form action="http://tus.example.org/966218c0bfcec3a138f9e8d1c4eac592" enctype="multipart/form-data" method="post">
-      <input name="_method" type="hidden" value="patch"
+    <form action="http://tus.example.org/966218c0bfcec3a138f9e8d1c4eac592?offset=1023" enctype="multipart/form-data" method="post">
+      <input name="_method" type="hidden" value="put"
       <input name="parent_id" type="text" value="123" />
       <input name="complete" type="hidden" value="false" />
-      <input data-offset="1023" maxLength="1024" name="file" type="file" format="file.txt" accept="text/plain" />
+      <input maxLength="1024" name="file" type="file" format="file.txt" accept="text/plain" />
       <button>Submit</button>
     </form>
     

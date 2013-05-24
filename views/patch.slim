@@ -1,9 +1,0 @@
-form.upload.patch action=url(resource.id) enctype='multipart/form-data' method='post'
-  fieldset
-    legend patch
-    input name='_method' type='hidden' value='PATCH'
-  
-    input name='complete' type='hidden' value=resource.complete?.to_s
-    input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' pattern=resource.name accept=resource.type required=true data-offset=resource.offset
-  
-    button submit

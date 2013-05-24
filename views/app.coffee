@@ -32,9 +32,10 @@ class Form
     @method = @element.querySelector('[name=_method]')?.value or @element.method
     @action = @element.action
     
-    @file_input = @element.querySelector '[type=file]'
+    @offset = parseInt @params()['offset'], 10 or 0
     
-    @offset = parseInt @file_input.getAttribute('data-offset') or 0, 10
+    @file_input = @element.querySelector '[type=file]'
+
     @length = parseInt @file_input?.maxLength, 10
     
     @metadata = @element.querySelectorAll 'input:not([type=file]):not([name=complete])'
@@ -46,6 +47,21 @@ class Form
     
   addEventListener: (type, listener, useCapture = true) ->
     @element.addEventListener type, listener, useCapture
+    
+  params: ->
+    plus = /\+/g
+    search = /([^&=]+)=?([^&]*)/g
+    decode = (s) -> decodeURIComponent s.replace(plus, ' ')
+  
+    index = @action.indexOf '?'
+    if index isnt -1 then hash = @action.substr index + 1 else hash = ''
+  
+    result = {}
+    while match = search.exec(hash)
+      key = decode match[1]
+      value = decode match[2]
+      result[key] = value
+    result
     
 class Upload
   
@@ -68,11 +84,10 @@ class Upload
     chunk.submit @onSuccess
     
   onSuccess: (e) =>    
-    if form = e.target.responseXML?.querySelector 'form.upload.patch'
+    if form = e.target.responseXML?.querySelector 'form.upload'
       @form = new Form(form)
       @start() unless @isPaused
     else
-      console.log @callback
       @callback @
     
   onConnectionFound: =>
@@ -175,11 +190,11 @@ class Create extends Chunk
 class ChunkFactory
   create: (form, file, progress) ->
     
-    matches = form.method.match /^(post|patch)$/i
+    matches = form.method.match /^(post|put)$/i
     type = matches[1].toLowerCase()
     switch type
       when 'post' then new Create(form, file, progress)
-      when 'patch' then new Chunk(form, file, progress)
+      when 'put' then new Chunk(form, file, progress)
       else console.log "upload failed: #{file.name}"
       
 window.addEventListener 'DOMContentLoaded', ->

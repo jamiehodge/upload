@@ -1,0 +1,9 @@
+form.upload action="#{url(resource.id)}?offset=#{resource.offset}" enctype='multipart/form-data' method='post'
+  fieldset
+    legend update
+    input name='_method' type='hidden' value='put'
+  
+    input name='complete' type='hidden' value=resource.complete?.to_s
+    input maxlength=ENV['UPLOAD_MAX_LENGTH'] name='file' type='file' pattern=resource.name accept=resource.type required=true
+  
+    button submit

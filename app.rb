@@ -37,7 +37,7 @@ class App < Sinatra::Base
       filename: resource.name, type: resource.type, disposition: 'inline'
   end
   
-  patch ID do
+  put ID do
     halt 409 if resource.complete?
     
     resource.set resource_params
